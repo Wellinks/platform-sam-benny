@@ -55,7 +55,9 @@ phases:
   build:
     commands:
       - echo "Running SAM sync..."
-      - sam sync --stack-name $STACK_NAME --no-watch
+      - sam build --stack-name $STACK_NAME
+      - echo "Deploying SAM application..."
+      - sam deploy --stack-name $STACK_NAME --no-confirm-changeset
 
 artifacts:
   files:
