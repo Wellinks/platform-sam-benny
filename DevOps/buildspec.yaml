@@ -57,7 +57,7 @@ phases:
       - echo "Running SAM sync..."
       - sam build
       - echo "Deploying SAM application..."
-      - sam deploy
+      - sam deploy --stack-name $STACK_NAME
 
 artifacts:
   files:
