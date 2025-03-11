@@ -5,16 +5,23 @@ phases:
     runtime-versions:
       nodejs: latest
     commands:
-      - echo "Installing AWS CLI and SAM CLI..."
-      - apt-get update -y
-      - apt-get install -y unzip
+      - echo "Updating system packages..."
+      - yum update -y
+      - echo "Installing dependencies..."
+      - yum install -y unzip tar gzip
+
+      - echo "Installing AWS CLI..."
       - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
       - unzip awscliv2.zip
       - sudo ./aws/install
+      - rm -rf awscliv2.zip aws
+
+      - echo "Installing AWS SAM CLI..."
       - curl -Lo aws-sam-cli-linux-x86_64.zip https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
       - unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
       - sudo ./sam-installation/install
-      - rm -rf awscliv2.zip aws sam-installation aws-sam-cli-linux-x86_64.zip
+      - rm -rf aws-sam-cli-linux-x86_64.zip sam-installation
+
       - export PATH=$PATH:/usr/local/bin
 
   pre_build:
@@ -25,7 +32,7 @@ phases:
       - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
       - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
       - aws configure set region $AWS_REGION
-      - echo "AWS CLI and SAM CLI configured."
+      - echo "AWS CLI and SAM CLI are configured successfully."
 
   build:
     commands:
