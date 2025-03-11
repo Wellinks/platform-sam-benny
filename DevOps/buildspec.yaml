@@ -55,7 +55,7 @@ phases:
   build:
     commands:
       - echo "Running SAM sync..."
-      - sam sync --stack-name $STACK_NAME --watch --no-interactive
+      - sam sync --stack-name $STACK_NAME
 
 artifacts:
   files:
