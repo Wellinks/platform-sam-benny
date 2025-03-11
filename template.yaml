@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31  # Using AWS SAM for easier deployment
+
+Resources:
+  # Lambda function for API Gateway Authorization
+  WellinksAuthLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: wellinksauthdevfunctiontest
+      Runtime: nodejs22.x
+      Handler: index.handler
+      CodeUri: ./lambda
+      MemorySize: 128
+      Timeout: 5
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+  # API Gateway definition
+  WellinksApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: wellinkauthdevapitest
+      StageName: dev
+      Auth:
+        DefaultAuthorizer: WellinksLambdaAuthorizer
+        Authorizers:
+          WellinksLambdaAuthorizer:
+            FunctionArn: !GetAtt WellinksAuthLambdaFunction.Arn
+            Identity:
+              Header: authorizationtoken
+              ReauthorizeEvery: 0
+      Variables:  # Ensure stage variables are defined within the API resource itself
+        appointment: "api-appointment.development.wellinks.com"
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          title: "Wellinks API Gateway"
+        paths:
+          /appointment:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: useremail
+                  in: header
+                  required: true
+                  type: string
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.appointment}/appointment"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.useremail: "context.authorizer.useremail"
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,useremail,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+
+          /appointment/{proxy+}:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: useremail
+                  in: header
+                  required: true
+                  type: string
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.appointment}/appointment/{proxy}"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.useremail: "context.authorizer.useremail"
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests for proxy"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,useremail,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+
+  # Force API Gateway to only invoke Lambda for `authorizers/s752iu`
+  WellinksApiGatewayAuthorizerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref WellinksAuthLambdaFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:302fzip1aa/authorizers/a207ce"
