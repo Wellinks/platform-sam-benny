@@ -44,9 +44,6 @@ phases:
 
   pre_build:
     commands:
-      - echo "Removing old AWS credentials (if any)..."
-      - rm -rf ~/.aws/credentials
-      - rm -rf ~/.aws/config
       - echo "Verifying AWS CLI and SAM CLI installation..."
       - aws --version
       - sam --version
