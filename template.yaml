@@ -1,8 +1,64 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31  # Using AWS SAM for easier deployment
 
+Parameters:
+  StackName:
+    Type: String
+    Default: "lambda-authorizer-dev-test"
+  S3Bucket:
+    Type: String
+    Default: "wellink-sam-auth-dev-test"
+  LambdaTimeout:
+    Type: String
+    Default: "5"
+
 Resources:
-  # Lambda function for API Gateway Authorization
+  CodeBuildIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: CloudFormationPermissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:UpdateStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DeleteStack
+                Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${StackName}/*"
+
+        - PolicyName: S3Permissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${S3Bucket}"
+                  - !Sub "arn:aws:s3:::${S3Bucket}/*"
+
+        - PolicyName: IAMPassRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: "*"
+
   WellinksAuthLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -11,11 +67,12 @@ Resources:
       Handler: index.handler
       CodeUri: ./lambda
       MemorySize: 128
-      Timeout: 5
+      Timeout: !Ref LambdaTimeout
       Policies:
         - AWSLambdaBasicExecutionRole
+        - AWSLambdaInvokeFullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
-  # API Gateway definition
   WellinksApiGateway:
     Type: AWS::Serverless::Api
     Properties:
@@ -29,7 +86,7 @@ Resources:
             Identity:
               Header: authorizationtoken
               ReauthorizeEvery: 0
-      Variables:  # Ensure stage variables are defined within the API resource itself
+      Variables:
         appointment: "api-appointment.development.wellinks.com"
       DefinitionBody:
         swagger: "2.0"
@@ -150,7 +207,6 @@ Resources:
                     responseTemplates:
                       application/json: "{}"
 
-  # Force API Gateway to only invoke Lambda for `authorizers/s752iu`
   WellinksApiGatewayAuthorizerPermission:
     Type: AWS::Lambda::Permission
     Properties:
