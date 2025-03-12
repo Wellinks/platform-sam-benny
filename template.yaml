@@ -157,4 +157,4 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref WellinksAuthLambdaFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:5iqkybh2j9/authorizers/wlsq5u"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:]/authorizers/x2nsbv"
