@@ -30,7 +30,7 @@ Resources:
               Header: authorizationtoken
               ReauthorizeEvery: 0
       Variables:  # Ensure stage variables are defined within the API resource itself
-        appointment: "api-appointment.development.wellinks.com"
+        appointment: "testttinnnngggggggg"
       DefinitionBody:
         swagger: "2.0"
         info:
