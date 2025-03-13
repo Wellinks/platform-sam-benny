@@ -51,13 +51,20 @@ phases:
       # - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
       # - aws configure set region $AWS_REGION
       - echo "AWS CLI and SAM CLI are configured successfully."
+      - echo "Fetching API Gateway ID..."
+      - API_ID=$(aws apigateway get-rest-apis --query "items[?name=='wellinkauthdevapitest'].id" --output text)
+      - echo "API Gateway ID: $API_ID"
+      
+      - echo "Fetching Authorizer ID..."
+      - AUTH_ID=$(aws apigateway get-authorizers --rest-api-id $API_ID --query "items[?name=='WellinksLambdaAuthorizer'].id" --output text)
+      - echo "Authorizer ID: $AUTH_ID"
 
   build:
     commands:
       - echo "Running SAM sync..."
       - sam build
       - echo "Deploying SAM application..."
-      - sam deploy --stack-name $STACK_NAME
+      - sam deploy --stack-name $STACK_NAME --parameter-overrides AuthId=$AUTH_ID
 
 artifacts:
   files:

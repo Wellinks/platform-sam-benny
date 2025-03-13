@@ -36,20 +36,34 @@ exports.handler = async (event) => {
         }
       });
     });
+    const policy = generatePolicy(decoded.sub, 'Allow', event.methodArn);
 
-    console.log("Token is valid:", decoded);
+    const isUSerToken = decoded.unique_name;
 
-    // Fetch the user ID from your backend API using the unique name from the decoded token
+    if(isUSerToken){
+      // Fetch the user ID from your backend API using the unique name from the decoded token
     const { id, email } = await getUserInfoFromAPI(decoded.unique_name);
 
     // Generate an IAM policy allowing access
-    const policy = generatePolicy(decoded.sub, 'Allow', event.methodArn);
+    
 
     // Attach user ID to the context, which will be passed to downstream APIs
     policy.context = {
       'userid': id,
       'useremail': email
     };
+
+    }else{
+
+      policy.context = {
+        'userid': "c2415875-bff3-404e-a792-8d7e594b37bc"
+      };
+
+    }
+
+    console.log("Token is valid:", decoded);
+
+    
 
     console.log(policy);
 

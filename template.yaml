@@ -1,6 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31  # Using AWS SAM for easier deployment
 
+Parameters:
+  AuthId:
+    Type: String
+    Description: "The API Gateway Authorizer ID"
+
+    
 Resources:
   # Lambda function for API Gateway Authorization
   WellinksAuthLambdaFunction:
@@ -157,4 +163,4 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref WellinksAuthLambdaFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:pxakk7vbjh]/authorizers/x2nsbv"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WellinksApiGateway}/authorizers/${AuthId}"

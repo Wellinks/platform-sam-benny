@@ -20,5 +20,5 @@ aws cloudformation deploy \
 # aliasing 
 
 sam.cmd build --profile wellinks-admin-dev
-sam.cmd deploy --stack-name lambda-authorizer-dev-test --capabilities CAPABILITY_IAM --s3-bucket wellink-sam-auth-dev-test --profile wellinks-admin-dev 
+sam.cmd deploy --stack-name lambda-authorizer-dev-test --profile wellinks-admin-dev 
 sam.cmd sync --stack-name lambda-authorizer-dev-test --profile wellinks-admin-dev
