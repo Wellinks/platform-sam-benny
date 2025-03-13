@@ -55,15 +55,21 @@ phases:
       - echo "Deploying first phase (without Lambda permissions)..."
       - sam build
       - sam deploy --stack-name $STACK_NAME --no-fail-on-empty-changeset
+
       - echo "Waiting for API Gateway creation..."
       - sleep 60  # Wait for API Gateway to be fully available
+
       - echo "Fetching API Gateway ID..."
-      - API_ID=$(aws apigateway get-rest-apis --query "items[?name=='wellinkauthdevapitest'].id" --output text)
-      - echo "API Gateway ID: $API_ID"
+      - |
+        API_ID=$(aws apigateway get-rest-apis --query "items[?name=='wellinkauthdevapitest'].id" --output text)
+        echo "API Gateway ID: $API_ID"
+        echo "API_ID=$API_ID" >> $CODEBUILD_ENV_VAR_FILE  # Save API ID for later use
+
       - echo "Fetching Authorizer ID..."
-      - AUTH_ID=$(aws apigateway get-authorizers --rest-api-id $API_ID --query "items[?name=='WellinksLambdaAuthorizer'].id" --output text)
-      - echo "Authorizer ID: $AUTH_ID"
-      - echo "AUTH_ID=$AUTH_ID" >> $CODEBUILD_ENV_VAR_FILE
+      - |
+        AUTH_ID=$(aws apigateway get-authorizers --rest-api-id $API_ID --query "items[?name=='WellinksLambdaAuthorizer'].id" --output text)
+        echo "Authorizer ID: $AUTH_ID"
+        echo "AUTH_ID=$AUTH_ID" >> $CODEBUILD_ENV_VAR_FILE  # Save Auth ID for later use
 
   build:
     commands:
