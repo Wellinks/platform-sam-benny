@@ -51,19 +51,29 @@ phases:
       # - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
       # - aws configure set region $AWS_REGION
       - echo "AWS CLI and SAM CLI are configured successfully."
+
+      - echo "Deploying first phase (without Lambda permissions)..."
+      - sam build
+      - sam deploy --stack-name $STACK_NAME --no-fail-on-empty-changeset
+      - echo "Waiting for API Gateway creation..."
+      - sleep 60  # Wait for API Gateway to be fully available
       - echo "Fetching API Gateway ID..."
       - API_ID=$(aws apigateway get-rest-apis --query "items[?name=='wellinkauthdevapitest'].id" --output text)
       - echo "API Gateway ID: $API_ID"
-      
       - echo "Fetching Authorizer ID..."
       - AUTH_ID=$(aws apigateway get-authorizers --rest-api-id $API_ID --query "items[?name=='WellinksLambdaAuthorizer'].id" --output text)
       - echo "Authorizer ID: $AUTH_ID"
+      - echo "AUTH_ID=$AUTH_ID" >> $CODEBUILD_ENV_VAR_FILE
 
   build:
     commands:
-      - echo "Running SAM sync..."
-      - sam build
-      - echo "Deploying SAM application..."
+      # - echo "Running SAM sync..."
+      # - sam build
+      # - echo "Deploying SAM application..."
+      # - sam deploy --stack-name $STACK_NAME
+
+      - echo "Deploying Lambda permission with dynamic Authorizer ID..."
+      - source $CODEBUILD_ENV_VAR_FILE
       - sam deploy --stack-name $STACK_NAME --parameter-overrides AuthId=$AUTH_ID
 
 artifacts:
