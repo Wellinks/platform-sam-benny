@@ -5,6 +5,7 @@ Parameters:
   AuthId:
     Type: String
     Description: "The API Gateway Authorizer ID"
+    Default: "NONE"
 
     
 Resources:
@@ -159,6 +160,7 @@ Resources:
   # Force API Gateway to only invoke Lambda for `authorizers/s752iu`
   WellinksApiGatewayAuthorizerPermission:
     Type: AWS::Lambda::Permission
+    Condition: HasAuthId
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref WellinksAuthLambdaFunction
