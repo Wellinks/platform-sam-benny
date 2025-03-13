@@ -7,6 +7,9 @@ Parameters:
     Description: "The API Gateway Authorizer ID"
     Default: "NONE"
 
+Conditions:
+  HasAuthId: !Not [!Equals [!Ref AuthId, "NONE"]]
+
     
 Resources:
   # Lambda function for API Gateway Authorization
