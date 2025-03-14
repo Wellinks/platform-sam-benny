@@ -22,3 +22,10 @@ aws cloudformation deploy \
 sam.cmd build --profile wellinks-admin-dev
 sam.cmd deploy --stack-name lambda-authorizer-dev-test --profile wellinks-admin-dev 
 sam.cmd sync --stack-name lambda-authorizer-dev-test --profile wellinks-admin-dev
+
+
+
+
+
+sam.cmd build --template mainTemplate.yaml --profile wellinks-admin-dev
+sam.cmd deploy --stack-name lambda-authorizer-dev-test-main-stack --template mainTemplate.yaml --profile wellinks-admin-dev 

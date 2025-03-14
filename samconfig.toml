@@ -5,6 +5,6 @@ version = 0.1
 [default.deploy.parameters]
 stack_name = "lambda-authorizer-dev-test"
 s3_bucket = "wellink-sam-auth-dev-test"
-capabilities = "CAPABILITY_IAM"
+capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
 region = "us-east-1"
 confirm_changeset = false
