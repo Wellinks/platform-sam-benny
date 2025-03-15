@@ -23,3 +23,6 @@ Resources:
       Parameters:
         AuthLambdaArn: !GetAtt LambdaStack.Outputs.WellinksAuthLambdaFunctionArn
         AuthId: !Ref AuthId  # Passing dynamic AuthId
+
+
+# test
