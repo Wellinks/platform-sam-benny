@@ -40,7 +40,17 @@ Resources:
               Header: authorizationtoken
               ReauthorizeEvery: 0
       Variables:  # Ensure stage variables are defined within the API resource itself
-        appointment: "testttinnnngggggggg"
+        appointment: "api-appointment.development.wellinks.com"
+        clinicalforms: "a97f6572c7ade4e178b45a2b3db0efc2-832e214b1805771a.elb.us-east-1.amazonaws.com"
+        commonutil: "a8fb1a279ed014a3cbc77ff0b1997e30-528798d80a8fdd16.elb.us-east-1.amazonaws.com"
+        communication: "api-communication.development.wellinks.com"
+        grid: "k8s-expgrida-myapiser-fe1d9aa6ef-d907b26755e6f9da.elb.us-east-1.amazonaws.com"
+        patient: "a7964d2c7866e40ca8a7790a156354dc-9e44a05b631bfcd9.elb.us-east-1.amazonaws.com"
+        pgi: "ac771c72acf4348b591373a052bde4fb-7784491e69f07fa3.elb.us-east-1.amazonaws.com"
+        report: "k8s-exprepor-myapiser-233515171d-06def96de6a3b872.elb.us-east-1.amazonaws.com"
+        task: "aeabed2e09776412da295807190c6fe8-2dfe590dc6d7ef56.elb.us-east-1.amazonaws.com"
+        users: "ac44be2c2f990415e8f916180dc04fb2-4604f126536b2ea5.elb.us-east-1.amazonaws.com"
+
       DefinitionBody:
         swagger: "2.0"
         info:
@@ -102,7 +112,6 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,useremail,userid'"
                     responseTemplates:
                       application/json: "{}"
-
           /appointment/{proxy+}:
             x-amazon-apigateway-any-method:
               security:
@@ -157,6 +166,109 @@ Resources:
                       method.response.header.Access-Control-Allow-Origin: "'*'"
                       method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
                       method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,useremail,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+          /care-plan:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.patient}/care-plan"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+
+          /care-plan/{proxy+}:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.patient}/care-plan/{proxy}"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests for proxy"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
                     responseTemplates:
                       application/json: "{}"
 
