@@ -1,11 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
+Transform: AWS::Serverless-2016-10-31  # Using AWS SAM for easier deployment
 
 Parameters:
-  AuthLambdaArn:
-    Type: String
-    Description: "ARN of the Lambda function for authorization"
-
   AuthId:
     Type: String
     Description: "The API Gateway Authorizer ID"
@@ -14,7 +10,22 @@ Parameters:
 Conditions:
   HasAuthId: !Not [!Equals [!Ref AuthId, "NONE"]]
 
+    
 Resources:
+  # Lambda function for API Gateway Authorization
+  WellinksAuthLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: wellinksauthdevfunctiontest
+      Runtime: nodejs22.x
+      Handler: index.handler
+      CodeUri: ./lambda
+      MemorySize: 128
+      Timeout: 5
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+  # API Gateway definition
   WellinksApiGateway:
     Type: AWS::Serverless::Api
     Properties:
@@ -24,11 +35,11 @@ Resources:
         DefaultAuthorizer: WellinksLambdaAuthorizer
         Authorizers:
           WellinksLambdaAuthorizer:
-            FunctionArn: !Ref AuthLambdaArn
+            FunctionArn: !GetAtt WellinksAuthLambdaFunction.Arn
             Identity:
               Header: authorizationtoken
               ReauthorizeEvery: 0
-      Variables:
+      Variables:  # Ensure stage variables are defined within the API resource itself
         appointment: "testttinnnngggggggg"
       DefinitionBody:
         swagger: "2.0"
@@ -148,18 +159,13 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,useremail,userid'"
                     responseTemplates:
                       application/json: "{}"
-  # Lambda Permission for API Gateway Authorizer
+
+  # Force API Gateway to only invoke Lambda for `authorizers/s752iu`
   WellinksApiGatewayAuthorizerPermission:
     Type: AWS::Lambda::Permission
     Condition: HasAuthId
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref AuthLambdaArn
+      FunctionName: !Ref WellinksAuthLambdaFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WellinksApiGateway}/authorizers/${AuthId}"
-
-
-Outputs:
-  WellinksApiGatewayId:
-    Description: "API Gateway ID"
-    Value: !Ref WellinksApiGateway

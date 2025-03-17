@@ -55,8 +55,8 @@ phases:
   build:
     commands:
       - echo "Deploying first phase (without Lambda permissions)..."
-      - sam build --template mainTemplate.yaml
-      - sam deploy --stack-name $STACK_NAME --parameter-overrides AuthId=NONE --no-fail-on-empty-changeset --template mainTemplate.yaml
+      - sam build
+      - sam deploy --stack-name $STACK_NAME --parameter-overrides AuthId=NONE --no-fail-on-empty-changeset
 
       - echo "Waiting for API Gateway creation..."
       - sleep 90  # Increase sleep time to allow API Gateway to be fully available
