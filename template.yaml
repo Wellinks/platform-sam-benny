@@ -19,7 +19,29 @@ Resources:
       FunctionName: wellinksauthdevfunctiontest
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: ./lambda
+      CodeUri: ./lambdaAuth
+      MemorySize: 128
+      Timeout: 5
+      Policies:
+        - AWSLambdaBasicExecutionRole
+  WellinksMobileAuthLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: wellinksauthmobiledevfunctiontest
+      Runtime: nodejs22.x
+      Handler: index.handler
+      CodeUri: ./lambdaMobileAuth
+      MemorySize: 128
+      Timeout: 5
+      Policies:
+        - AWSLambdaBasicExecutionRole
+  WellinksValidationLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: wellinksvalidationdevfunctiontest
+      Runtime: nodejs22.x
+      Handler: index.handler
+      CodeUri: ./lambdaValidation
       MemorySize: 128
       Timeout: 5
       Policies:
