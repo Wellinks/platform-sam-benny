@@ -67,15 +67,20 @@ phases:
         echo "API Gateway ID: $API_ID"
         echo "API_ID=$API_ID" >> /tmp/env_variables.sh  # Save API ID for later use
 
-      - echo "Fetching Authorizer ID..."
+      - echo "Fetching Authorizer IDs..."
       - |
         AUTH_ID=$(aws apigateway get-authorizers --rest-api-id $API_ID --query "items[?name=='WellinksLambdaAuthorizer'].id" --output text)
-        echo "Authorizer ID: $AUTH_ID"
-        echo "AUTH_ID=$AUTH_ID" >> /tmp/env_variables.sh  # Save Auth ID for later use
+        MOBILE_AUTH_ID=$(aws apigateway get-authorizers --rest-api-id $API_ID --query "items[?name=='WellinksLambdaMobileAuthorizer'].id" --output text)
+        VALIDATION_AUTH_ID=$(aws apigateway get-authorizers --rest-api-id $API_ID --query "items[?name=='WellinksLambdaValidationAuthorizer'].id" --output text)
+        
+        echo "Authorizer IDs: $AUTH_ID, $MOBILE_AUTH_ID, $VALIDATION_AUTH_ID"
+        echo "AUTH_ID=$AUTH_ID" >> /tmp/env_variables.sh
+        echo "MOBILE_AUTH_ID=$MOBILE_AUTH_ID" >> /tmp/env_variables.sh
+        echo "VALIDATION_AUTH_ID=$VALIDATION_AUTH_ID" >> /tmp/env_variables.sh
 
-      - echo "Deploying Lambda permission with dynamic Authorizer ID..."
-      - source /tmp/env_variables.sh  # Load API_ID and AUTH_ID
-      - sam deploy --stack-name $STACK_NAME --parameter-overrides AuthId=$AUTH_ID
+      - echo "Deploying Lambda permission with dynamic Authorizer IDs..."
+      - source /tmp/env_variables.sh  # Load saved variables
+      - sam deploy --stack-name $STACK_NAME --parameter-overrides AuthId=$AUTH_ID MobileAuthId=$MOBILE_AUTH_ID ValidationAuthId=$VALIDATION_AUTH_ID
 
 
 artifacts:

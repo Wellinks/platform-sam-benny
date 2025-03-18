@@ -7,9 +7,20 @@ Parameters:
     Description: "The API Gateway Authorizer ID"
     Default: "NONE"
 
+  MobileAuthId:
+    Type: String
+    Description: "The API Gateway Authorizer ID for WellinksLambdaMobileAuthorizer"
+    Default: "NONE"
+
+  ValidationAuthId:
+    Type: String
+    Description: "The API Gateway Authorizer ID for WellinksLambdaValidationAuthorizer"
+    Default: "NONE"
+
 Conditions:
   HasAuthId: !Not [!Equals [!Ref AuthId, "NONE"]]
-
+  HasMobileAuthId: !Not [!Equals [!Ref MobileAuthId, "NONE"]]
+  HasValidationAuthId: !Not [!Equals [!Ref ValidationAuthId, "NONE"]]
     
 Resources:
   # Lambda function for API Gateway Authorization
@@ -60,6 +71,17 @@ Resources:
             FunctionArn: !GetAtt WellinksAuthLambdaFunction.Arn
             Identity:
               Header: authorizationtoken
+              ReauthorizeEvery: 0
+          WellinksLambdaMobileAuthorizer:
+            FunctionArn: !GetAtt WellinksMobileAuthLambdaFunction.Arn
+            Identity:
+              Header: authorizationtoken
+              ReauthorizeEvery: 0
+          WellinksLambdaValidationAuthorizer:
+            FunctionArn: !GetAtt WellinksValidationLambdaFunction.Arn
+            Identity:
+              Headers:
+                - Header
               ReauthorizeEvery: 0
       Variables:  # Ensure stage variables are defined within the API resource itself
         appointment: "api-appointment.development.wellinks.com"
@@ -530,7 +552,7 @@ Resources:
           /communication:
             x-amazon-apigateway-any-method:
               security:
-                - WellinksLambdaAuthorizer: []
+                - WellinksLambdaValidationAuthorizer: []
               parameters:
                 - name: userid
                   in: header
@@ -582,7 +604,7 @@ Resources:
           /communication/{proxy+}:
             x-amazon-apigateway-any-method:
               security:
-                - WellinksLambdaAuthorizer: []
+                - WellinksLambdaValidationAuthorizer: []
               parameters:
                 - name: userid
                   in: header
@@ -2704,3 +2726,21 @@ Resources:
       FunctionName: !Ref WellinksAuthLambdaFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WellinksApiGateway}/authorizers/${AuthId}"
+
+  WellinksApiGatewayMobileAuthPermission:
+    Type: AWS::Lambda::Permission
+    Condition: HasMobileAuthId
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref WellinksMobileAuthLambdaFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WellinksApiGateway}/authorizers/${MobileAuthId}"
+
+  WellinksApiGatewayValidationAuthPermission:
+    Type: AWS::Lambda::Permission
+    Condition: HasValidationAuthId
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref WellinksValidationLambdaFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WellinksApiGateway}/authorizers/${ValidationAuthId}"
