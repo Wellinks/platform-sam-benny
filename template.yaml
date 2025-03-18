@@ -56,6 +56,34 @@ Resources:
         info:
           title: "Wellinks API Gateway"
         paths:
+          get:
+            summary: "Root GET"
+            description: "Handles GET requests to the root path"
+            produces:
+              - application/json
+            responses:
+              "200":
+                description: "Successful response"
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+            x-amazon-apigateway-integration:
+              type: "mock"
+              requestTemplates:
+                application/json: |
+                  {
+                    "statusCode": 200
+                  }
+              responses:
+                default:
+                  statusCode: "200"
+                  responseTemplates:
+                    application/json: |
+                      {
+                        "message": "Welcome to Wellinks API Gateway"
+                      }
           /appointment:
             x-amazon-apigateway-any-method:
               security:
