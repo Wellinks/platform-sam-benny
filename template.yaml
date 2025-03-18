@@ -81,16 +81,16 @@ Resources:
           get:
             summary: "Root GET"
             description: "Handles GET requests to the root path"
-            produces:
-              - application/json
             responses:
               "200":
                 description: "Successful response"
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      properties:
+                        message:
+                          type: string
             x-amazon-apigateway-integration:
               type: "mock"
               requestTemplates:
