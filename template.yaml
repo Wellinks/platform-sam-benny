@@ -1562,6 +1562,418 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
                     responseTemplates:
                       application/json: "{}"
+          /partner:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.patient}/partner"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+
+          /partner/{proxy+}:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.patient}/partner/{proxy}"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests for proxy"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+          /patient-notifications:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.commonutil}/patient-notifications"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+
+          /patient-notifications/{proxy+}:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.commonutil}/patient-notifications/{proxy}"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests for proxy"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+          /patients:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.patient}/patients"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+
+          /patients/{proxy+}:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.patient}/patients/{proxy}"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests for proxy"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+          /peripheral-devices:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.commonutil}/peripheral-devices"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
+
+          /peripheral-devices/{proxy+}:
+            x-amazon-apigateway-any-method:
+              security:
+                - WellinksLambdaAuthorizer: []
+              parameters:
+                - name: userid
+                  in: header
+                  required: true
+                  type: string
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: "HTTP_PROXY"
+                uri: "https://${stageVariables.commonutil}/peripheral-devices/{proxy}"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                requestParameters:
+                  integration.request.header.userid: "context.authorizer.userid"
+
+            options:
+              summary: "CORS preflight support"
+              description: "Handles preflight OPTIONS requests for proxy"
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              responses:
+                "200":
+                  description: "CORS response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                type: "mock"
+                requestTemplates:
+                  application/json: |
+                    {
+                      "statusCode": 200
+                    }
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS, POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,userid'"
+                    responseTemplates:
+                      application/json: "{}"
 
   # Force API Gateway to only invoke Lambda for `authorizers/s752iu`
   WellinksApiGatewayAuthorizerPermission:
