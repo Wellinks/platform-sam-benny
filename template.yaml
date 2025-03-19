@@ -30,7 +30,7 @@ Resources:
       FunctionName: wellinksauthdevfunctiontest
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: ./lambdaAuth
+      CodeUri: ./authorizers/lambdaAuth
       MemorySize: 128
       Timeout: 5
       Policies:
@@ -41,7 +41,7 @@ Resources:
       FunctionName: wellinksauthmobiledevfunctiontest
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: ./lambdaMobileAuth
+      CodeUri: ./authorizers/lambdaMobileAuth
       MemorySize: 128
       Timeout: 5
       Policies:
@@ -52,7 +52,7 @@ Resources:
       FunctionName: wellinksvalidationdevfunctiontest
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: ./lambdaValidation
+      CodeUri: ./authorizers/lambdaValidation
       MemorySize: 128
       Timeout: 5
       Policies:
