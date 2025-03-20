@@ -93,7 +93,7 @@ phases:
 
       # Get Branch Name (Fix Empty Branch Issue)
       - BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD || echo "unknown")
-      - echo "Branch Name: $BRANCH_NAME"
+      - echo "Branch Name:$BRANCH_NAME"
 
       # Construct Teams Message JSON
       - echo "Generating Teams Message JSON..."
