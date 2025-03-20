@@ -89,7 +89,7 @@ Resources:
   WellinksAuthLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "wellinksauth${!FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]}"
+      FunctionName: !Join ["", ["wellinksauth", !FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]]]
       Runtime: nodejs22.x
       Handler: index.handler
       CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriAuth]
@@ -100,7 +100,7 @@ Resources:
   WellinksMobileAuthLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "wellinksauthmobile${!FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]}"
+      FunctionName: !Join ["", ["wellinksauthmobile", !FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]]]
       Runtime: nodejs22.x
       Handler: index.handler
       CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriMobileAuth]
@@ -111,7 +111,7 @@ Resources:
   WellinksValidationLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "wellinksvalidation${!FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]}"
+      FunctionName: !Join ["", ["wellinksvalidation", !FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]]]
       Runtime: nodejs22.x
       Handler: index.handler
       CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriValidation]
