@@ -83,7 +83,7 @@ phases:
 
   post_build:
     commands:
-      - echo "Build completed on `date`"
+      - echo "Build completed on $(date)"
 
       # Determine Build Status
       - echo "Checking build status..."
@@ -91,10 +91,17 @@ phases:
       - if [ $? -eq 0 ]; then BUILD_STATUS="✅ Build Succeeded"; fi
       - echo "Build Status:$BUILD_STATUS"
 
+      # Get Branch Name (Fix Empty Branch Issue)
+      - BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD || echo "unknown")
+      - echo "Branch Name: $BRANCH_NAME"
+
       # Construct Teams Message JSON
       - echo "Generating Teams Message JSON..."
       - |
-        echo '{
+        cat <<EOF > teams_message.json
+        {
+          "summary": "Build Notification",
+          "text": "$BUILD_STATUS",
           "attachments": [
             {
               "contentType": "application/vnd.microsoft.card.adaptive",
@@ -109,7 +116,7 @@ phases:
                     "items": [
                       {
                         "type": "TextBlock",
-                        "text": "'"$BUILD_STATUS"'",
+                        "text": "$BUILD_STATUS",
                         "weight": "bolder",
                         "size": "medium"
                       }
@@ -118,30 +125,27 @@ phases:
                   {
                     "type": "FactSet",
                     "facts": [
-                      { "title": "Branch:", "value": "'"$CODEBUILD_SOURCE_VERSION"'" },
-                      { "title": "Environment:", "value": "'"$ENVIRONMENT"'" }
+                      { "title": "Branch", "value": "$BRANCH_NAME" },
+                      { "title": "Environment", "value": "$ENVIRONMENT" }
                     ]
                   }
                 ]
               }
             }
           ]
-        }' > teams_message.json
+        }
+        EOF
 
       # Log JSON message before sending
       - echo "Generated Teams Message:"
       - cat teams_message.json
 
-      # Test webhook connectivity
-      - echo "Checking if the webhook URL is reachable..."
-      - curl -Is "https://convexityscientific.webhook.office.com/webhookb2/15efd2d6-d4ab-4f9b-813f-730e6b1b81f1@95f9de66-de17-46bf-a258-42a607447a48/IncomingWebhook/41f6bb49a5074526b81691e429162f86/81d4e23b-c2f3-4676-8d92-166fab321107/V2BKZoMkcSUdJuTm4vLAOjzKKr0bK3kcW1NgnWSF6POLI1" | head -n 1
-
       # Send message to Teams and log the response
       - echo "Sending Teams Notification..."
       - curl -X POST "https://convexityscientific.webhook.office.com/webhookb2/15efd2d6-d4ab-4f9b-813f-730e6b1b81f1@95f9de66-de17-46bf-a258-42a607447a48/IncomingWebhook/41f6bb49a5074526b81691e429162f86/81d4e23b-c2f3-4676-8d92-166fab321107/V2BKZoMkcSUdJuTm4vLAOjzKKr0bK3kcW1NgnWSF6POLI1" -H "Content-Type:application/json" --data "@teams_message.json"
 
+
       # Capture exit status of curl
-      - echo "Checking if Teams notification was sent..."
       - RESPONSE=$?
       - if [ $RESPONSE -ne 0 ]; then
           echo "❌ Teams notification failed!";
