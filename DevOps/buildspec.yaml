@@ -49,10 +49,7 @@ phases:
       - sam --version
       - echo "AWS CLI and SAM CLI are configured successfully."
 
-      - |
-        if [ -z "$ENVIRONMENT" ]; then 
-          export ENVIRONMENT="dev"; 
-        fi
+      - export ENVIRONMENT=${ENVIRONMENT:-dev}
       - echo "Using environment: $ENVIRONMENT"
 
   build:
