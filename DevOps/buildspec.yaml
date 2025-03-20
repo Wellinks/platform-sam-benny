@@ -89,7 +89,7 @@ phases:
       - echo "Checking build status..."
       - BUILD_STATUS="❌ Build Failed"
       - if [ $? -eq 0 ]; then BUILD_STATUS="✅ Build Succeeded"; fi
-      - echo "Build Status: $BUILD_STATUS"
+      - echo "Build Status:$BUILD_STATUS"
 
       # Construct Teams Message JSON
       - echo "Generating Teams Message JSON..."
