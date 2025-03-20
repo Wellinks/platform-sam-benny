@@ -138,7 +138,7 @@ phases:
 
       # Send message to Teams and log the response
       - echo "Sending Teams Notification..."
-      - curl -X POST "https://convexityscientific.webhook.office.com/webhookb2/15efd2d6-d4ab-4f9b-813f-730e6b1b81f1@95f9de66-de17-46bf-a258-42a607447a48/IncomingWebhook/41f6bb49a5074526b81691e429162f86/81d4e23b-c2f3-4676-8d92-166fab321107/V2BKZoMkcSUdJuTm4vLAOjzKKr0bK3kcW1NgnWSF6POLI1" -H "Content-Type: application/json" --data "@teams_message.json"
+      - curl -X POST "https://convexityscientific.webhook.office.com/webhookb2/15efd2d6-d4ab-4f9b-813f-730e6b1b81f1@95f9de66-de17-46bf-a258-42a607447a48/IncomingWebhook/41f6bb49a5074526b81691e429162f86/81d4e23b-c2f3-4676-8d92-166fab321107/V2BKZoMkcSUdJuTm4vLAOjzKKr0bK3kcW1NgnWSF6POLI1" -H "Content-Type:application/json" --data "@teams_message.json"
 
       # Capture exit status of curl
       - echo "Checking if Teams notification was sent..."
