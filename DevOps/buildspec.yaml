@@ -47,23 +47,26 @@ phases:
       - echo "Verifying AWS CLI and SAM CLI installation..."
       - aws --version
       - sam --version
-      # - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-      # - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-      # - aws configure set region $AWS_REGION
       - echo "AWS CLI and SAM CLI are configured successfully."
+
+      # Set default environment if not provided
+      - if [ -z "$ENVIRONMENT" ]; then export ENVIRONMENT="dev"; fi
+      - echo "Using environment: $ENVIRONMENT"
 
   build:
     commands:
       - echo "Deploying first phase (without Lambda permissions)..."
       - sam build
-      - sam deploy --stack-name $STACK_NAME --parameter-overrides AuthId=NONE --no-fail-on-empty-changeset
+      - sam deploy --stack-name wellinks-api-$ENVIRONMENT \
+          --parameter-overrides Environment=$ENVIRONMENT AuthId=NONE \
+          --no-fail-on-empty-changeset
 
       - echo "Waiting for API Gateway creation..."
-      - sleep 60  # Increase sleep time to allow API Gateway to be fully available
+      - sleep 60 
 
       - echo "Fetching API Gateway ID..."
       - |
-        API_ID=$(aws apigateway get-rest-apis --query "items[?name=='wellinkauthdevapitest'].id" --output text)
+        API_ID=$(aws apigateway get-rest-apis --query "items[?name=='wellinksauth-$ENVIRONMENT-api'].id" --output text)
         echo "API Gateway ID: $API_ID"
         echo "API_ID=$API_ID" >> /tmp/env_variables.sh  # Save API ID for later use
 
@@ -79,9 +82,9 @@ phases:
         echo "VALIDATION_AUTH_ID=$VALIDATION_AUTH_ID" >> /tmp/env_variables.sh
 
       - echo "Deploying Lambda permission with dynamic Authorizer IDs..."
-      - source /tmp/env_variables.sh  # Load saved variables
-      - sam deploy --stack-name $STACK_NAME --parameter-overrides AuthId=$AUTH_ID MobileAuthId=$MOBILE_AUTH_ID ValidationAuthId=$VALIDATION_AUTH_ID
-
+      - source /tmp/env_variables.sh 
+      - sam deploy --stack-name wellinks-api-$ENVIRONMENT \
+          --parameter-overrides Environment=$ENVIRONMENT AuthId=$AUTH_ID MobileAuthId=$MOBILE_AUTH_ID ValidationAuthId=$VALIDATION_AUTH_ID
 
 artifacts:
   files:

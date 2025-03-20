@@ -17,6 +17,65 @@ Parameters:
     Description: "The API Gateway Authorizer ID for WellinksLambdaValidationAuthorizer"
     Default: "NONE"
 
+Mappings:
+  EnvironmentConfig:
+    dev:
+      ApiName: "wellinksauth-dev-api"
+      StageName: "dev"
+      FunctionSuffix: "-dev-function"
+      CodeUriAuth: "./authorizers/dev/lambdaAuth"
+      CodeUriMobileAuth: "./authorizers/dev/lambdaMobileAuth"
+      CodeUriValidation: "./authorizers/dev/lambdaValidation"
+      AppointmentURL: "api-appointment.development.wellinks.com"
+      ClinicalFormsURL: "a97f6572c7ade4e178b45a2b3db0efc2-832e214b1805771a.elb.us-east-1.amazonaws.com"
+      CommonUtilURL: "a8fb1a279ed014a3cbc77ff0b1997e30-528798d80a8fdd16.elb.us-east-1.amazonaws.com"
+      CommunicationURL: "k8s-expgrida-myapiser-fe1d9aa6ef-d907b26755e6f9da.elb.us-east-1.amazonaws.com"
+      GridURL: "k8s-expgrida-myapiser-fe1d9aa6ef-d907b26755e6f9da.elb.us-east-1.amazonaws.com"
+      PatientURL: "a7964d2c7866e40ca8a7790a156354dc-9e44a05b631bfcd9.elb.us-east-1.amazonaws.com"
+      PGIURL: "ac771c72acf4348b591373a052bde4fb-7784491e69f07fa3.elb.us-east-1.amazonaws.com"
+      ReportURL: "k8s-exprepor-myapiser-233515171d-06def96de6a3b872.elb.us-east-1.amazonaws.com"
+      TaskURL: "aeabed2e09776412da295807190c6fe8-2dfe590dc6d7ef56.elb.us-east-1.amazonaws.com"
+      UsersURL: "ac44be2c2f990415e8f916180dc04fb2-4604f126536b2ea5.elb.us-east-1.amazonaws.com"
+      AuthId: "AUTH_DEV_ID"
+
+    staging:
+      ApiName: "wellinksauth-staging-api"
+      StageName: "staging"
+      FunctionSuffix: "-staging-function"
+      CodeUriAuth: "./authorizers/staging/lambdaAuth"
+      CodeUriMobileAuth: "./authorizers/staging/lambdaMobileAuth"
+      CodeUriValidation: "./authorizers/staging/lambdaValidation"
+      AppointmentURL: "api-appointment.staging.wellinks.com"
+      ClinicalFormsURL: "staging-clinicalforms.com"
+      CommonUtilURL: "staging-commonutil.com"
+      CommunicationURL: "api-communication.staging.wellinks.com"
+      GridURL: "staging-grid.com"
+      PatientURL: "staging-patient.com"
+      PGIURL: "staging-pgi.com"
+      ReportURL: "staging-report.com"
+      TaskURL: "staging-task.com"
+      UsersURL: "staging-users.com"
+      AuthId: "AUTH_STAGING_ID"
+
+    prod:
+      ApiName: "wellinksauth-prod-api"
+      StageName: "prod"
+      FunctionSuffix: "-prod-function"
+      CodeUriAuth: "./authorizers/prod/lambdaAuth"
+      CodeUriMobileAuth: "./authorizers/prod/lambdaMobileAuth"
+      CodeUriValidation: "./authorizers/prod/lambdaValidation"
+      AppointmentURL: "api-appointment.prod.wellinks.com"
+      ClinicalFormsURL: "prod-clinicalforms.com"
+      CommonUtilURL: "prod-commonutil.com"
+      CommunicationURL: "api-communication.prod.wellinks.com"
+      GridURL: "prod-grid.com"
+      PatientURL: "prod-patient.com"
+      PGIURL: "prod-pgi.com"
+      ReportURL: "prod-report.com"
+      TaskURL: "prod-task.com"
+      UsersURL: "prod-users.com"
+      AuthId: "AUTH_PROD_ID"
+
 Conditions:
   HasAuthId: !Not [!Equals [!Ref AuthId, "NONE"]]
   HasMobileAuthId: !Not [!Equals [!Ref MobileAuthId, "NONE"]]
@@ -27,10 +86,10 @@ Resources:
   WellinksAuthLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: wellinksauthdevfunctiontest
+      FunctionName: !Sub "wellinksauth${!FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]}"
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: ./authorizers/lambdaAuth
+      CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriAuth]
       MemorySize: 128
       Timeout: 5
       Policies:
@@ -38,10 +97,10 @@ Resources:
   WellinksMobileAuthLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: wellinksauthmobiledevfunctiontest
+      FunctionName: !Sub "wellinksauthmobile${!FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]}"
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: ./authorizers/lambdaMobileAuth
+      CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriMobileAuth]
       MemorySize: 128
       Timeout: 5
       Policies:
@@ -49,10 +108,10 @@ Resources:
   WellinksValidationLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: wellinksvalidationdevfunctiontest
+      FunctionName: !Sub "wellinksvalidation${!FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]}"
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: ./authorizers/lambdaValidation
+      CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriValidation]
       MemorySize: 128
       Timeout: 5
       Policies:
@@ -62,8 +121,8 @@ Resources:
   WellinksApiGateway:
     Type: AWS::Serverless::Api
     Properties:
-      Name: wellinkauthdevapitest
-      StageName: dev
+      Name: !FindInMap [EnvironmentConfig, !Ref Environment, ApiName]
+      StageName: !FindInMap [EnvironmentConfig, !Ref Environment, StageName]
       Auth:
         DefaultAuthorizer: WellinksLambdaAuthorizer
         Authorizers:
@@ -83,17 +142,17 @@ Resources:
               Headers:
                 - Header
               ReauthorizeEvery: 0
-      Variables:  # Ensure stage variables are defined within the API resource itself
-        appointment: "api-appointment.development.wellinks.com"
-        clinicalforms: "a97f6572c7ade4e178b45a2b3db0efc2-832e214b1805771a.elb.us-east-1.amazonaws.com"
-        commonutil: "a8fb1a279ed014a3cbc77ff0b1997e30-528798d80a8fdd16.elb.us-east-1.amazonaws.com"
-        communication: "api-communication.development.wellinks.com"
-        grid: "k8s-expgrida-myapiser-fe1d9aa6ef-d907b26755e6f9da.elb.us-east-1.amazonaws.com"
-        patient: "a7964d2c7866e40ca8a7790a156354dc-9e44a05b631bfcd9.elb.us-east-1.amazonaws.com"
-        pgi: "ac771c72acf4348b591373a052bde4fb-7784491e69f07fa3.elb.us-east-1.amazonaws.com"
-        report: "k8s-exprepor-myapiser-233515171d-06def96de6a3b872.elb.us-east-1.amazonaws.com"
-        task: "aeabed2e09776412da295807190c6fe8-2dfe590dc6d7ef56.elb.us-east-1.amazonaws.com"
-        users: "ac44be2c2f990415e8f916180dc04fb2-4604f126536b2ea5.elb.us-east-1.amazonaws.com"
+      Variables: 
+        appointment: !FindInMap [EnvironmentConfig, !Ref Environment, AppointmentURL]
+        clinicalforms: !FindInMap [EnvironmentConfig, !Ref Environment, ClinicalFormsURL]
+        commonutil: !FindInMap [EnvironmentConfig, !Ref Environment, CommonUtilURL]
+        communication: !FindInMap [EnvironmentConfig, !Ref Environment, CommunicationURL]
+        grid: !FindInMap [EnvironmentConfig, !Ref Environment, GridURL]
+        patient: !FindInMap [EnvironmentConfig, !Ref Environment, PatientURL]
+        pgi: !FindInMap [EnvironmentConfig, !Ref Environment, PGIURL]
+        report: !FindInMap [EnvironmentConfig, !Ref Environment, ReportURL]
+        task: !FindInMap [EnvironmentConfig, !Ref Environment, TaskURL]
+        users: !FindInMap [EnvironmentConfig, !Ref Environment, UsersURL]
 
       DefinitionBody:
         swagger: "2.0"

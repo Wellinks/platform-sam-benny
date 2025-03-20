@@ -1,10 +1,31 @@
 version = 0.1
 
-[default]
-[default.deploy]
-[default.deploy.parameters]
-stack_name = "lambda-authorizer-dev-test"
+[dev]
+[dev.deploy]
+[dev.deploy.parameters]
+stack_name = "wellinks-api-dev"
 s3_bucket = "wellink-sam-auth-dev-test"
 capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
 region = "us-east-1"
 confirm_changeset = false
+parameter_overrides = "Environment=dev"
+
+[staging]
+[staging.deploy]
+[staging.deploy.parameters]
+stack_name = "wellinks-api-staging"
+s3_bucket = "wellink-sam-auth-staging"
+capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
+region = "us-east-1"
+confirm_changeset = false
+parameter_overrides = "Environment=staging"
+
+[prod]
+[prod.deploy]
+[prod.deploy.parameters]
+stack_name = "wellinks-api-prod"
+s3_bucket = "wellink-sam-auth-prod"
+capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
+region = "us-east-1"
+confirm_changeset = false
+parameter_overrides = "Environment=prod"
