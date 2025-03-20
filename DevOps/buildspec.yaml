@@ -48,7 +48,7 @@ phases:
       - aws --version
       - sam --version
       - echo "AWS CLI and SAM CLI are configured successfully."
-      - echo "Using environment: $ENVIRONMENT"
+      - echo "Using environment:$ENVIRONMENT"
 
   build:
     commands:
