@@ -20,15 +20,25 @@ Parameters:
     Description: "The API Gateway Authorizer ID for WellinksLambdaValidationAuthorizer"
     Default: "NONE"
 
+  LambdaAuthPath:
+    Type: String
+    Default: "./authorizers/dev/lambdaAuth"
+  LambdaMobileAuthPath:
+    Type: String
+    Default: "./authorizers/dev/lambdaMobileAuth"
+  LambdaValidationPath:
+    Type: String
+    Default: "./authorizers/dev/lambdaValidation"
+
 Mappings:
   EnvironmentConfig:
     dev:
       ApiName: "wellinksauth-dev-api"
       StageName: "dev"
       FunctionSuffix: "-dev-function"
-      CodeUriAuth: "./authorizers/dev/lambdaAuth"
-      CodeUriMobileAuth: "./authorizers/dev/lambdaMobileAuth"
-      CodeUriValidation: "./authorizers/dev/lambdaValidation"
+      # CodeUriAuth: "./authorizers/dev/lambdaAuth"
+      # CodeUriMobileAuth: "./authorizers/dev/lambdaMobileAuth"
+      # CodeUriValidation: "./authorizers/dev/lambdaValidation"
       AppointmentURL: "api-appointment.development.wellinks.com"
       ClinicalFormsURL: "a97f6572c7ade4e178b45a2b3db0efc2-832e214b1805771a.elb.us-east-1.amazonaws.com"
       CommonUtilURL: "a8fb1a279ed014a3cbc77ff0b1997e30-528798d80a8fdd16.elb.us-east-1.amazonaws.com"
@@ -39,15 +49,15 @@ Mappings:
       ReportURL: "k8s-exprepor-myapiser-233515171d-06def96de6a3b872.elb.us-east-1.amazonaws.com"
       TaskURL: "aeabed2e09776412da295807190c6fe8-2dfe590dc6d7ef56.elb.us-east-1.amazonaws.com"
       UsersURL: "ac44be2c2f990415e8f916180dc04fb2-4604f126536b2ea5.elb.us-east-1.amazonaws.com"
-      AuthId: "AUTH_DEV_ID"
+      # AuthId: "AUTH_DEV_ID"
 
     staging:
       ApiName: "wellinksauth-staging-api"
       StageName: "staging"
       FunctionSuffix: "-staging-function"
-      CodeUriAuth: "./authorizers/staging/lambdaAuth"
-      CodeUriMobileAuth: "./authorizers/staging/lambdaMobileAuth"
-      CodeUriValidation: "./authorizers/staging/lambdaValidation"
+      # CodeUriAuth: "./authorizers/staging/lambdaAuth"
+      # CodeUriMobileAuth: "./authorizers/staging/lambdaMobileAuth"
+      # CodeUriValidation: "./authorizers/staging/lambdaValidation"
       AppointmentURL: "api-appointment.staging.wellinks.com"
       ClinicalFormsURL: "staging-clinicalforms.com"
       CommonUtilURL: "staging-commonutil.com"
@@ -58,15 +68,15 @@ Mappings:
       ReportURL: "staging-report.com"
       TaskURL: "staging-task.com"
       UsersURL: "staging-users.com"
-      AuthId: "AUTH_STAGING_ID"
+      # AuthId: "AUTH_STAGING_ID"
 
     prod:
       ApiName: "wellinksauth-prod-api"
       StageName: "prod"
       FunctionSuffix: "-prod-function"
-      CodeUriAuth: "./authorizers/prod/lambdaAuth"
-      CodeUriMobileAuth: "./authorizers/prod/lambdaMobileAuth"
-      CodeUriValidation: "./authorizers/prod/lambdaValidation"
+      # CodeUriAuth: "./authorizers/prod/lambdaAuth"
+      # CodeUriMobileAuth: "./authorizers/prod/lambdaMobileAuth"
+      # CodeUriValidation: "./authorizers/prod/lambdaValidation"
       AppointmentURL: "api-appointment.prod.wellinks.com"
       ClinicalFormsURL: "prod-clinicalforms.com"
       CommonUtilURL: "prod-commonutil.com"
@@ -77,7 +87,7 @@ Mappings:
       ReportURL: "prod-report.com"
       TaskURL: "prod-task.com"
       UsersURL: "prod-users.com"
-      AuthId: "AUTH_PROD_ID"
+      # AuthId: "AUTH_PROD_ID"
 
 Conditions:
   HasAuthId: !Not [!Equals [!Ref AuthId, "NONE"]]
@@ -92,7 +102,7 @@ Resources:
       FunctionName: !Join ["", ["wellinksauth", !FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]]]
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriAuth]
+      CodeUri: !Ref LambdaAuthPath
       MemorySize: 128
       Timeout: 5
       Policies:
@@ -103,7 +113,7 @@ Resources:
       FunctionName: !Join ["", ["wellinksauthmobile", !FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]]]
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriMobileAuth]
+      CodeUri: !Ref LambdaMobileAuthPath
       MemorySize: 128
       Timeout: 5
       Policies:
@@ -114,7 +124,7 @@ Resources:
       FunctionName: !Join ["", ["wellinksvalidation", !FindInMap [EnvironmentConfig, !Ref Environment, FunctionSuffix]]]
       Runtime: nodejs22.x
       Handler: index.handler
-      CodeUri: !FindInMap [EnvironmentConfig, !Ref Environment, CodeUriValidation]
+      CodeUri: !Ref LambdaValidationPath
       MemorySize: 128
       Timeout: 5
       Policies:
