@@ -54,10 +54,7 @@ phases:
     commands:
       - echo "Deploying first phase (without Lambda permissions)..."
       - sam build
-      - sam deploy --stack-name wellinks-api-$ENVIRONMENT \
-          --parameter-overrides Environment=$ENVIRONMENT AuthId=NONE \
-          --no-fail-on-empty-changeset \
-          --config-env $ENVIRONMENT
+      - sam deploy --config-env $ENVIRONMENT --parameter-overrides Environment=$ENVIRONMENT AuthId=NONE --no-fail-on-empty-changeset 
 
       - echo "Waiting for API Gateway creation..."
       - sleep 60 
@@ -81,8 +78,7 @@ phases:
 
       - echo "Deploying Lambda permission with dynamic Authorizer IDs..."
       - source /tmp/env_variables.sh 
-      - sam deploy --stack-name wellinks-api-$ENVIRONMENT \
-          --parameter-overrides Environment=$ENVIRONMENT AuthId=$AUTH_ID MobileAuthId=$MOBILE_AUTH_ID ValidationAuthId=$VALIDATION_AUTH_ID --config-env $ENVIRONMENT
+      - sam deploy --config-env $ENVIRONMENT --parameter-overrides Environment=$ENVIRONMENT AuthId=$AUTH_ID MobileAuthId=$MOBILE_AUTH_ID ValidationAuthId=$VALIDATION_AUTH_ID
 
 artifacts:
   files:
