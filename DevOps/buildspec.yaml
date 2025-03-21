@@ -101,7 +101,6 @@ phases:
         cat <<EOF > teams_message.json
         {
           "summary": "Build Notification",
-          "text": "$BUILD_STATUS",
           "attachments": [
             {
               "contentType": "application/vnd.microsoft.card.adaptive",
