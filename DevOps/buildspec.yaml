@@ -81,76 +81,90 @@ phases:
       - sam deploy --config-env $ENVIRONMENT --parameter-overrides Environment=$ENVIRONMENT AuthId=$AUTH_ID MobileAuthId=$MOBILE_AUTH_ID ValidationAuthId=$VALIDATION_AUTH_ID
 
 
-  post_build:
-    commands:
-      - echo "Build completed on $(date)"
+post_build:
+  commands:
+    - echo "Build completed on $(date)"
 
-      # Determine Build Status
-      - echo "Checking build status..."
-      - BUILD_STATUS="❌ Build Failed"
-      - if [ $? -eq 0 ]; then BUILD_STATUS="✅ Build Succeeded"; fi
-      - echo "Build Status:$BUILD_STATUS"
+    # Determine Build Status
+    - echo "Checking build status..."
+    - BUILD_STATUS="❌ Build Failed"
+    - if [ $? -eq 0 ]; then BUILD_STATUS="✅ Build Succeeded"; fi
+    - echo "Build Status:$BUILD_STATUS"
 
-      # Get Branch Name (Fix Empty Branch Issue)
-      - BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD || echo "unknown")
-      - echo "Branch Name:$BRANCH_NAME"
+    # Get Branch Name (Fix Empty Branch Issue)
+    - BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD || echo "unknown")
+    - if [ -z "$BRANCH_NAME" ]; then BRANCH_NAME="unknown"; fi
+    - echo "Branch Name:$BRANCH_NAME"
 
-      # Construct Teams Message JSON
-      - echo "Generating Teams Message JSON..."
-      - |
-        cat <<EOF > teams_message.json
-        {
-          "summary": "Build Notification",
-          "attachments": [
-            {
-              "contentType": "application/vnd.microsoft.card.adaptive",
-              "content": {
-                "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                "type": "AdaptiveCard",
-                "version": "1.0",
-                "msteams": { "width": "Full" },
-                "body": [
-                  {
-                    "type": "Container",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "$BUILD_STATUS",
-                        "weight": "bolder",
-                        "size": "medium"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "FactSet",
-                    "facts": [
-                      { "title": "Branch", "value": "$BRANCH_NAME" },
-                      { "title": "Environment", "value": "$ENVIRONMENT" }
-                    ]
-                  }
-                ]
-              }
+    # Set Environment fallback
+    - if [ -z "$ENVIRONMENT" ]; then ENVIRONMENT="not-set"; fi
+    - echo "Environment:$ENVIRONMENT"
+
+    # Construct Teams Message JSON
+    - echo "Generating Teams Message JSON..."
+    - |
+      cat <<EOF > teams_message.json
+      {
+        "summary": "Build Notification for SAM",
+        "text": "Build Status:$BUILD_STATUS\nBranch:$BRANCH_NAME\nEnvironment:$ENVIRONMENT",
+        "attachments": [
+          {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "content": {
+              "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+              "type": "AdaptiveCard",
+              "version": "1.0",
+              "msteams": { "width": "Full" },
+              "body": [
+                {
+                  "type": "Container",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text":"$BUILD_STATUS",
+                      "weight": "bolder",
+                      "size": "medium"
+                    }
+                  ]
+                },
+                {
+                  "type": "FactSet",
+                  "facts": [
+                    { "title": "Branch", "value":"$BRANCH_NAME" },
+                    { "title": "Environment", "value":"$ENVIRONMENT" }
+                  ]
+                }
+              ]
             }
-          ]
-        }
-        EOF
+          }
+        ]
+      }
+      EOF
 
-      # Log JSON message before sending
-      - echo "Generated Teams Message:"
-      - cat teams_message.json
+    # Validate JSON before sending
+    - echo "Validating JSON..."
+    - cat teams_message.json | jq .
+    - if [ $? -ne 0 ]; then
+        echo "❌ JSON is invalid!";
+        exit 1;
+      else
+        echo "✅ JSON is valid!";
+      fi
 
-      # Send message to Teams and log the response
-      - echo "Sending Teams Notification..."
-      - curl -X POST "https://convexityscientific.webhook.office.com/webhookb2/15efd2d6-d4ab-4f9b-813f-730e6b1b81f1@95f9de66-de17-46bf-a258-42a607447a48/IncomingWebhook/41f6bb49a5074526b81691e429162f86/81d4e23b-c2f3-4676-8d92-166fab321107/V2BKZoMkcSUdJuTm4vLAOjzKKr0bK3kcW1NgnWSF6POLI1" -H "Content-Type:application/json" --data "@teams_message.json"
+    # Log JSON message before sending
+    - echo "Generated Teams Message:"
+    - cat teams_message.json
 
+    # Send message to Teams and log the response
+    - echo "Sending Teams Notification..."
+    - curl -X POST "https://convexityscientific.webhook.office.com/webhookb2/15efd2d6-d4ab-4f9b-813f-730e6b1b81f1@95f9de66-de17-46bf-a258-42a607447a48/IncomingWebhook/41f6bb49a5074526b81691e429162f86/81d4e23b-c2f3-4676-8d92-166fab321107/V2BKZoMkcSUdJuTm4vLAOjzKKr0bK3kcW1NgnWSF6POLI1" -H "Content-Type: application/json" --data "@teams_message.json"
 
-      # Capture exit status of curl
-      - RESPONSE=$?
-      - if [ $RESPONSE -ne 0 ]; then
-          echo "❌ Teams notification failed!";
-        else
-          echo "✅ Teams notification sent successfully!";
-        fi
+    - RESPONSE=$?
+    - if [ $RESPONSE -ne 0 ]; then
+        echo "❌ Teams notification failed!";
+      else
+        echo "✅ Teams notification sent successfully!";
+      fi
 
 
 artifacts:
