@@ -106,7 +106,6 @@ phases:
         END_TIME=$(date +%s)
         DURATION=$((END_TIME - START_TIME))
         DURATION_HUMAN=$(printf '%02dm %02ds' $((DURATION/60)) $((DURATION%60)))
-
       - [ -z "$BRANCH_NAME" ] && BRANCH_NAME="unknown"
       - [ -z "$COMMIT_AUTHOR" ] && COMMIT_AUTHOR="unknown"
       - [ -z "$COMMIT_HASH" ] && COMMIT_HASH="unknown"
