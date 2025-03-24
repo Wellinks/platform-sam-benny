@@ -22,13 +22,13 @@ Parameters:
 
   LambdaAuthPath:
     Type: String
-    Default: "./authorizers/dev/lambdaAuth"
+    Default: "./authorizers/lambdaAuth"
   LambdaMobileAuthPath:
     Type: String
-    Default: "./authorizers/dev/lambdaMobileAuth"
+    Default: "./authorizers/lambdaMobileAuth"
   LambdaValidationPath:
     Type: String
-    Default: "./authorizers/dev/lambdaValidation"
+    Default: "./authorizers/lambdaValidation"
 
 Mappings:
   EnvironmentConfig:
