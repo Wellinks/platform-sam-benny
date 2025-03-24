@@ -89,13 +89,19 @@ phases:
       - START_TIME=$(date +%s)
       - BRANCH_NAME=${CODEBUILD_WEBHOOK_HEAD_REF##refs/heads/}
       - |
-        if [ -z "$BRANCH_NAME" ]; then
+        if [ -n "$CODEBUILD_WEBHOOK_HEAD_REF" ]; then
+          BRANCH_NAME=${CODEBUILD_WEBHOOK_HEAD_REF##refs/heads/}
+        elif [[ "$CODEBUILD_SOURCE_VERSION" == refs/heads/* ]]; then
+          BRANCH_NAME=${CODEBUILD_SOURCE_VERSION##refs/heads/}
+        elif [[ "$CODEBUILD_SOURCE_VERSION" == pr/* ]]; then
           BRANCH_NAME=$CODEBUILD_SOURCE_VERSION
+        else
+          BRANCH_NAME="unknown"
         fi
-      - ENVIRONMENT=${ENVIRONMENT:-staging}
+      - ENVIRONMENT=$ENVIRONMENT
       - TIMESTAMP=$(date)
       - BUILD_ID=$CODEBUILD_BUILD_ID
-      - PROJECT_NAME=$CODEBUILD_PROJECT_NAME
+      - PROJECT_NAME=${CODEBUILD_PROJECT_NAME:-wellinks-sam-lambda-auth-benny-test}
       - AWS_REGION=$AWS_DEFAULT_REGION
       - COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
