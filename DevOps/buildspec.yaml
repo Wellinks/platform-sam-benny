@@ -9,6 +9,7 @@ phases:
       - yum update -y
       - echo "Installing dependencies..."
       - yum install -y unzip tar gzip
+      - yum install -y jq
 
       - echo "Checking and Updating AWS CLI..."
       - if aws --version; then 
@@ -86,18 +87,7 @@ phases:
       - echo "Sending Teams notification..."
 
       # Setup
-      - START_TIME=$(date +%s)
-      - BRANCH_NAME=${CODEBUILD_WEBHOOK_HEAD_REF##refs/heads/}
-      - |
-        if [ -n "$CODEBUILD_WEBHOOK_HEAD_REF" ]; then
-          BRANCH_NAME=${CODEBUILD_WEBHOOK_HEAD_REF##refs/heads/}
-        elif [[ "$CODEBUILD_SOURCE_VERSION" == refs/heads/* ]]; then
-          BRANCH_NAME=${CODEBUILD_SOURCE_VERSION##refs/heads/}
-        elif [[ "$CODEBUILD_SOURCE_VERSION" == pr/* ]]; then
-          BRANCH_NAME=$CODEBUILD_SOURCE_VERSION
-        else
-          BRANCH_NAME="unknown"
-        fi
+      - BRANCH_NAME=${CODEBUILD_BRANCH_NAME:-main}
       - ENVIRONMENT=$ENVIRONMENT
       - TIMESTAMP=$(date)
       - BUILD_ID=$CODEBUILD_BUILD_ID
@@ -118,16 +108,27 @@ phases:
           CARD_COLOR="attention"
         fi
 
-        END_TIME=$(date +%s)
-        DURATION=$((END_TIME - START_TIME))
-        DURATION_HUMAN=$(printf '%02dm %02ds' $((DURATION/60)) $((DURATION%60)))
-
         [ -z "$BRANCH_NAME" ] && BRANCH_NAME="unknown"
         [ -z "$COMMIT_AUTHOR" ] && COMMIT_AUTHOR="unknown"
         [ -z "$COMMIT_HASH" ] && COMMIT_HASH="unknown"
 
         BUILD_URL="https://${AWS_REGION}.console.aws.amazon.com/codesuite/codebuild/${ACCOUNT_ID}/projects/${PROJECT_NAME}/build/${BUILD_ID}?region=${AWS_REGION}"
 
+      - |
+        echo "Fetching real build start and end time..."
+        BUILD_INFO=$(aws codebuild batch-get-builds --ids "$BUILD_ID")
+
+        START_TIME=$(echo "$BUILD_INFO" | jq -r '.builds[0].startTime')
+        END_TIME=$(echo "$BUILD_INFO" | jq -r '.builds[0].endTime')
+
+        # Remove fractional seconds and timezone 'Z' if present
+        START_TIME_CLEAN=${START_TIME%%.*}  # strips milliseconds
+        END_TIME_CLEAN=${END_TIME%%.*}
+
+        START_EPOCH=$(date -u -d "$START_TIME_CLEAN" +%s)
+        END_EPOCH=$(date -u -d "$END_TIME_CLEAN" +%s)
+        DURATION=$((END_EPOCH - START_EPOCH))
+        DURATION_HUMAN=$(printf '%02dm %02ds' $((DURATION/60)) $((DURATION%60)))
 
       # Generate JSON
       - |
