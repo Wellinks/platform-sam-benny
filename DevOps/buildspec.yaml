@@ -88,12 +88,14 @@ phases:
       # Setup
       - START_TIME=$(date +%s)
       - BRANCH_NAME=${CODEBUILD_WEBHOOK_HEAD_REF##refs/heads/}
+      - [ -z "$BRANCH_NAME" ] && BRANCH_NAME=$CODEBUILD_SOURCE_VERSION
       - ENVIRONMENT=${ENVIRONMENT:-staging}
       - TIMESTAMP=$(date)
       - BUILD_ID=$CODEBUILD_BUILD_ID
       - PROJECT_NAME=$CODEBUILD_PROJECT_NAME
       - AWS_REGION=$AWS_DEFAULT_REGION
       - COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an' || echo "unknown")
 
       # Build status (simulate real detection if needed)
@@ -115,7 +117,7 @@ phases:
         [ -z "$COMMIT_AUTHOR" ] && COMMIT_AUTHOR="unknown"
         [ -z "$COMMIT_HASH" ] && COMMIT_HASH="unknown"
 
-        BUILD_URL="https://${AWS_REGION}.console.aws.amazon.com/codesuite/codebuild/$PROJECT_NAME/build/$BUILD_ID?region=$AWS_REGION"
+        BUILD_URL="https://${AWS_REGION}.console.aws.amazon.com/codesuite/codebuild/${ACCOUNT_ID}/projects/${PROJECT_NAME}/build/${BUILD_ID}?region=${AWS_REGION}"
 
 
       # Generate JSON
