@@ -100,16 +100,23 @@ phases:
       - BUILD_STATUS="✅ Build Succeeded"
       # - BUILD_STATUS="❌ Build Failed"
 
-      - if [[ "$BUILD_STATUS" == "✅ Build Succeeded" ]]; then CARD_COLOR="good"; else CARD_COLOR="attention"; fi
-
       - |
+        if [[ "$BUILD_STATUS" == "✅ Build Succeeded" ]]; then
+          CARD_COLOR="good"
+        else
+          CARD_COLOR="attention"
+        fi
+
         END_TIME=$(date +%s)
         DURATION=$((END_TIME - START_TIME))
         DURATION_HUMAN=$(printf '%02dm %02ds' $((DURATION/60)) $((DURATION%60)))
-      - [ -z "$BRANCH_NAME" ] && BRANCH_NAME="unknown"
-      - [ -z "$COMMIT_AUTHOR" ] && COMMIT_AUTHOR="unknown"
-      - [ -z "$COMMIT_HASH" ] && COMMIT_HASH="unknown"
-      - BUILD_URL="https://${AWS_REGION}.console.aws.amazon.com/codesuite/codebuild/$PROJECT_NAME/build/$BUILD_ID?region=$AWS_REGION"
+
+        [ -z "$BRANCH_NAME" ] && BRANCH_NAME="unknown"
+        [ -z "$COMMIT_AUTHOR" ] && COMMIT_AUTHOR="unknown"
+        [ -z "$COMMIT_HASH" ] && COMMIT_HASH="unknown"
+
+        BUILD_URL="https://${AWS_REGION}.console.aws.amazon.com/codesuite/codebuild/$PROJECT_NAME/build/$BUILD_ID?region=$AWS_REGION"
+
 
       # Generate JSON
       - |
