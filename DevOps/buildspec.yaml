@@ -55,6 +55,7 @@ phases:
     commands:
       - echo "Deploying first phase (without Lambda permissions)..."
       - sam build
+      - false
       - sam deploy --config-env $ENVIRONMENT --parameter-overrides Environment=$ENVIRONMENT AuthId=NONE --no-fail-on-empty-changeset 
 
       - echo "Waiting for API Gateway creation..."
