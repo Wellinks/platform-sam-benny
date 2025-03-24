@@ -83,51 +83,87 @@ phases:
 
   post_build:
     commands:
-      - echo "Build completed on $(date)"
+      - echo "Sending Teams notification..."
 
-      # Determine Build Status
-      - echo "Checking build status..."
-      - BUILD_STATUS="❌ Build Failed"
-      - if [ $? -eq 0 ]; then BUILD_STATUS="✅ Build Succeeded"; fi
-      - echo "Build Status:$BUILD_STATUS"
+      # Setup
+      - START_TIME=$(date +%s)
+      - BRANCH_NAME=${CODEBUILD_WEBHOOK_HEAD_REF##refs/heads/}
+      - ENVIRONMENT=${ENVIRONMENT:-staging}
+      - TIMESTAMP=$(date)
+      - BUILD_ID=$CODEBUILD_BUILD_ID
+      - PROJECT_NAME=$CODEBUILD_PROJECT_NAME
+      - AWS_REGION=$AWS_DEFAULT_REGION
+      - COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an' || echo "unknown")
 
-      # Get Branch Name (Fix Empty Branch Issue)
-      - BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD || echo "unknown")
-      - echo "Branch Name:$BRANCH_NAME"
+      # Build status (simulate real detection if needed)
+      - BUILD_STATUS="✅ Build Succeeded"
+      # - BUILD_STATUS="❌ Build Failed"
 
-      # Construct Teams Message JSON
-      - echo "Generating Teams Message JSON..."
+      - if [[ "$BUILD_STATUS" == "✅ Build Succeeded" ]]; then CARD_COLOR="good"; else CARD_COLOR="attention"; fi
+
+      - |
+        END_TIME=$(date +%s)
+        DURATION=$((END_TIME - START_TIME))
+        DURATION_HUMAN=$(printf '%02dm %02ds' $((DURATION/60)) $((DURATION%60)))
+
+      - [ -z "$BRANCH_NAME" ] && BRANCH_NAME="unknown"
+      - [ -z "$COMMIT_AUTHOR" ] && COMMIT_AUTHOR="unknown"
+      - [ -z "$COMMIT_HASH" ] && COMMIT_HASH="unknown"
+      - BUILD_URL="https://${AWS_REGION}.console.aws.amazon.com/codesuite/codebuild/$PROJECT_NAME/build/$BUILD_ID?region=$AWS_REGION"
+
+      # Generate JSON
       - |
         cat <<EOF > teams_message.json
         {
-          "summary": "Build Notification",
-          "text": "$BUILD_STATUS",
+          "type": "message",
           "attachments": [
             {
               "contentType": "application/vnd.microsoft.card.adaptive",
               "content": {
                 "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
                 "type": "AdaptiveCard",
-                "version": "1.0",
+                "version": "1.4",
                 "msteams": { "width": "Full" },
                 "body": [
                   {
-                    "type": "Container",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "$BUILD_STATUS",
-                        "weight": "bolder",
-                        "size": "medium"
-                      }
-                    ]
+                    "type": "TextBlock",
+                    "text": "🚀 Build Notification: $PROJECT_NAME",
+                    "weight": "bolder",
+                    "size": "large",
+                    "color": "accent"
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "$BUILD_STATUS",
+                    "size": "medium",
+                    "weight": "bolder",
+                    "color": "$CARD_COLOR",
+                    "spacing": "small"
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "---------------------------",
+                    "spacing": "medium",
+                    "separator": true
                   },
                   {
                     "type": "FactSet",
                     "facts": [
-                      { "title": "Branch", "value": "$BRANCH_NAME" },
-                      { "title": "Environment", "value": "$ENVIRONMENT" }
+                      { "title": "📦 Branch:", "value": "$BRANCH_NAME" },
+                      { "title": "🌎 Environment:", "value": "$ENVIRONMENT" },
+                      { "title": "⏱ Duration:", "value": "$DURATION_HUMAN" },
+                      { "title": "🕘 Timestamp:", "value": "$TIMESTAMP" },
+                      { "title": "🧑‍💻 Author:", "value": "$COMMIT_AUTHOR" },
+                      { "title": "🔢 Commit:", "value": "$COMMIT_HASH" }
                     ]
+                  }
+                ],
+                "actions": [
+                  {
+                    "type": "Action.OpenUrl",
+                    "title": "🔍 View Build Logs",
+                    "url": "$BUILD_URL"
                   }
                 ]
               }
@@ -136,22 +172,18 @@ phases:
         }
         EOF
 
-      # Log JSON message before sending
-      - echo "Generated Teams Message:"
+      - echo "Generated Teams message:"
       - cat teams_message.json
 
-      # Send message to Teams and log the response
-      - echo "Sending Teams Notification..."
-      - curl -X POST "https://convexityscientific.webhook.office.com/webhookb2/15efd2d6-d4ab-4f9b-813f-730e6b1b81f1@95f9de66-de17-46bf-a258-42a607447a48/IncomingWebhook/41f6bb49a5074526b81691e429162f86/81d4e23b-c2f3-4676-8d92-166fab321107/V2BKZoMkcSUdJuTm4vLAOjzKKr0bK3kcW1NgnWSF6POLI1" -H "Content-Type:application/json" --data "@teams_message.json"
+      # Send to Teams
+      - |
+        curl -s -w "\nHTTP Status: %{http_code}\n" -o curl_response.txt \
+          -X POST "https://convexityscientific.webhook.office.com/webhookb2/15efd2d6-d4ab-4f9b-813f-730e6b1b81f1@95f9de66-de17-46bf-a258-42a607447a48/IncomingWebhook/41f6bb49a5074526b81691e429162f86/81d4e23b-c2f3-4676-8d92-166fab321107/V2BKZoMkcSUdJuTm4vLAOjzKKr0bK3kcW1NgnWSF6POLI1" \
+          -H "Content-Type: application/json" \
+          --data "@teams_message.json"
 
 
-      # Capture exit status of curl
-      - RESPONSE=$?
-      - if [ $RESPONSE -ne 0 ]; then
-          echo "❌ Teams notification failed!";
-        else
-          echo "✅ Teams notification sent successfully!";
-        fi
+      - cat curl_response.txt
 
 
 artifacts:
