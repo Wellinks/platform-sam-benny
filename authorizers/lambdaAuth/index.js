@@ -40,9 +40,13 @@ exports.handler = async (event) => {
 
     const isUSerToken = decoded.unique_name;
 
+    console.log(decoded);
+
     if(isUSerToken){
       // Fetch the user ID from your backend API using the unique name from the decoded token
     const { id, email } = await getUserInfoFromAPI(decoded.unique_name);
+
+    console.log("email", email)
 
     // Generate an IAM policy allowing access
     
@@ -50,7 +54,7 @@ exports.handler = async (event) => {
     // Attach user ID to the context, which will be passed to downstream APIs
     policy.context = {
       'userid': id,
-      'useremail': email
+      'useremail': email,
     };
 
     }else{
@@ -97,7 +101,7 @@ async function getUserInfoFromAPI(uniqueName) {
   try {
     const response = await axios.get(`http://a92d554b276e0498997451435907f26e-fc586e864ef7b55c.elb.us-east-1.amazonaws.com/users/${uniqueName}`, {
       headers: {
-        'user-id': 'c2415875-bff3-404e-a792-8d7e594b37bc' // Replace with actual UUID if needed
+        'userid': 'c2415875-bff3-404e-a792-8d7e594b37bc' // Replace with actual UUID if needed
       }
     });
 
