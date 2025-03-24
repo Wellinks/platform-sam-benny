@@ -88,7 +88,10 @@ phases:
       # Setup
       - START_TIME=$(date +%s)
       - BRANCH_NAME=${CODEBUILD_WEBHOOK_HEAD_REF##refs/heads/}
-      - [ -z "$BRANCH_NAME" ] && BRANCH_NAME=$CODEBUILD_SOURCE_VERSION
+      - |
+        if [ -z "$BRANCH_NAME" ]; then
+          BRANCH_NAME=$CODEBUILD_SOURCE_VERSION
+        fi
       - ENVIRONMENT=${ENVIRONMENT:-staging}
       - TIMESTAMP=$(date)
       - BUILD_ID=$CODEBUILD_BUILD_ID
